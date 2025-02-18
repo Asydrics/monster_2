@@ -72,7 +72,7 @@
                         </div>
                         <div class="">
                         <a
-                            href="{{route('posts.show', ['id' => $randomMonster->id, 'slug' => Str::slug($randomMonster->name, '-')])}}"
+                            href="{{route('posts.show', ['id' => $randomMonster->id])}}"
                             class="inline-block text-white bg-red-500 hover:bg-red-700 rounded-full px-4 py-2 transition-colors duration-300"
                             >Plus de détails</a
                         >
@@ -121,7 +121,7 @@
                         </div>
                         <div class="text-center">
                         <a
-                            href="{{route('posts.show', ['id' => $post->id, 'slug' => Str::slug($post->name, '-')])}}"
+                            href="{{route('posts.show', ['id' => $post->id])}}"
                             class="inline-block text-white bg-red-500 hover:bg-red-700 rounded-full px-4 py-2 transition-colors duration-300"
                             >Plus de détails</a
                         >

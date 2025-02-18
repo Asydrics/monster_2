@@ -1,32 +1,12 @@
-
 services:
-  app:
-    build: .
-    container_name: laravel_app
-    restart: always
-    working_dir: /var/www/html
-    volumes:
-      - .:/var/www/html
-    ports:
-      - "8000:80"
-    depends_on:
-      - db
-    environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - APP_KEY=base64:your_generated_key
-
-  db:
-    image: mysql:8.0
-    container_name: laravel_db
-    restart: always
-    environment:
-      MYSQL_DATABASE: laravel
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3307:3306"
-    volumes:
-      - dbdata:/var/lib/mysql
-
-volumes:
-  dbdata:
+    dev:
+        build:
+            context: .
+            dockerfile: Dockerfiledev
+        ports:
+            - "8081:8080"
+        volumes:
+            - .:/var/www/html
+        environment:
+            XDEBUG_MODE: develop,debug
+            XDEBUG_CLIENT_HOST: host.docker.internal

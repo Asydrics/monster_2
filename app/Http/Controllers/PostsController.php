@@ -33,7 +33,9 @@ class PostsController extends Controller
         $name = request('name');
         $type = request('type');
 
-        $typeId = Monster_type::where('name', $type)->first()->id;  // Utilisation du modèle MonsterType
+        // dd(request()->all());
+
+        $typeId = Monster_type::where('name', ucfirst($type))->first()->id;  // Utilisation du modèle MonsterType
 
         $monster = new Monster();
         $monster->name = $name;
@@ -47,6 +49,7 @@ class PostsController extends Controller
         $monster->updated_at = now();
         $monster->save();
         return redirect()->route('posts.index')->with('success', 'Monstre ajouté avec succès !');
+
     }
 
     //Supprimer un monstre
@@ -56,9 +59,9 @@ class PostsController extends Controller
         return redirect()->route('posts.index')->with('success', 'Monstre supprimé avec succès !');
     }
 
-    public function show($id, $slug) {
+    public function show($id)
+    {
         $monster = Monster::where('id', $id)
-        ->where('name', $slug)
         ->firstOrFail();
         return view('posts.show', compact('monster'));
     }
@@ -83,7 +86,7 @@ class PostsController extends Controller
         $name = request('name');
         $description = request ('description');
 
-        $typeId = Monster_type::where('name', $type)->first()->id;
+        $typeId = Monster_type::where('name', ucfirst($type))->first()->id;
         
         // Mise à jour des champs du monstre
         $monster->pv = $pv;

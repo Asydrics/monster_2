@@ -1,38 +1,52 @@
-# Étape 1 : Utiliser une image PHP avec Apache
-FROM php:8.2-apache
 
-# Étape 2 : Installer les extensions et dépendances nécessaires
+
+# ─────────────────────────────────────────────────────────────────────────
+# Étape 2 : Installer les dépendances PHP + Composer
+FROM php:8.3-fpm
+
+# Installer les extensions PHP nécessaires
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libzip-dev \
-    libfreetype6-dev \
-    zip \
-    unzip \
     git \
+    unzip \
+    libpq-dev \
+    libzip-dev \
+    libonig-dev \
     curl \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip opcache
 
-# Étape 3 : Installer Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Installer Composer (depuis l'image Composer officielle)
+COPY --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
-# Étape 4 : Copier le projet Laravel
+# Définir le répertoire de travail
 WORKDIR /var/www/html
-COPY . /var/www/html
+COPY . .
 
-# Étape 5 : Donner les permissions nécessaires
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 755 /var/www/html
-RUN apt-get update && apt-get install -y libssl-dev
+# Copier le build Node
+# COPY --from=node-builder /app/public/build /var/www/html/public/build
 
+RUN composer install --no-dev --optimize-autoloader
 
-# Étape 6 : Activer le module Apache rewrite
-RUN a2enmod rewrite
+# Permissions
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Étape 7 : Exposer le port 80
-EXPOSE 80
+# ► 1) Créer le dossier de destination
+RUN mkdir -p storage/app/public/images
 
-# Étape 8 : Lancer Apache
-CMD ["apache2-foreground"]
+# ► 2) Copier les anciennes images (si le dossier public/images existe)
+RUN if [ -d "public/images" ]; then \
+      cp -r public/images/* storage/app/public/images/ || true; \
+    fi
+
+# ► 3) Supprimer l'ancien dossier public/images
+RUN rm -rf public/images
+
+# ► 4) Créer le lien symbolique
+RUN ln -s /var/www/html/storage/app/public/images /var/www/html/public/images
+
+# ► 5) (Optionnel) php artisan storage:link
+RUN php artisan storage:link || true
+
+EXPOSE 8080
+
+# Commande de démarrage pour Laravel
+CMD  php artisan serve --host=0.0.0.0 --port=$PORT
