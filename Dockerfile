@@ -5,6 +5,7 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
+    libzip-dev \
     libfreetype6-dev \
     zip \
     unzip \
@@ -24,6 +25,8 @@ COPY . /var/www/html
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html
+RUN apt-get update && apt-get install -y libssl-dev
+
 
 # Étape 6 : Activer le module Apache rewrite
 RUN a2enmod rewrite
